@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
-import { logger } from '@/utils/logger';
+import { logger } from '../utils/logger';
 
 // Create custom rate limit handler
 const rateLimitHandler = (req: Request, res: Response) => {

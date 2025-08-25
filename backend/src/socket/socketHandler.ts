@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { socketAuth } from '@/middleware/auth';
-import { logger } from '@/utils/logger';
-import { SocketUser, SocketEvents } from '@/types';
+import { socketAuth } from '../middleware/auth';
+import { logger } from '../utils/logger';
+import { SocketUser, SocketEvents } from '../types';
 
 // Store connected users
 const connectedUsers = new Map<string, SocketUser>();

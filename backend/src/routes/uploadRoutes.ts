@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { authenticate } from '@/middleware/auth';
-import { uploadLimiter } from '@/middleware/rateLimiter';
+import { authenticate } from '../middleware/auth';
+import { uploadLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { User } from '@/models/User';
-import { AuthRequest, ApiResponse } from '@/types';
-import { asyncHandler, AppError } from '@/middleware/errorHandler';
-import { logger } from '@/utils/logger';
+import { User } from '../models/User';
+import { AuthRequest, ApiResponse } from '../types';
+import { asyncHandler, AppError } from '../middleware/errorHandler';
+import { logger } from '../utils/logger';
 import mongoose from 'mongoose';
 
 // Register user

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '@/models/User';
-import { AuthRequest, ApiResponse } from '@/types';
-import { logger } from '@/utils/logger';
+import { User } from '../models/User';
+import { AuthRequest, ApiResponse } from '../types';
+import { logger } from '../utils/logger';
 
 // Extend Request interface to include user
 declare global {

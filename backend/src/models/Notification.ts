@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { INotification } from '@/types';
+import { INotification } from '../types';
 
 const NotificationSchema = new Schema<INotification>({
   recipient: {

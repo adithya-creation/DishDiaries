@@ -9,10 +9,10 @@ import {
   deactivateAccount,
   followUser,
   unfollowUser
-} from '@/controllers/authController';
-import { authenticate } from '@/middleware/auth';
-import { authLimiter } from '@/middleware/rateLimiter';
-// import { validateRegister, validateLogin, validateUpdateProfile, validateChangePassword } from '@/middleware/validation';
+} from '../controllers/authController';
+import { authenticate } from '../middleware/auth';
+import { authLimiter } from '../middleware/rateLimiter';
+// import { validateRegister, validateLogin, validateUpdateProfile, validateChangePassword } from '../middleware/validation';
 
 const router = Router();
 

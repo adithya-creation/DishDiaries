@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { Recipe } from '@/models/Recipe';
-import { AuthRequest, ApiResponse } from '@/types';
-import { asyncHandler, AppError } from '@/middleware/errorHandler';
-import { logger } from '@/utils/logger';
-import { uploadImageFromBuffer } from '@/utils/cloudinary';
+import { Recipe } from '../models/Recipe';
+import { AuthRequest, ApiResponse } from '../types';
+import { asyncHandler, AppError } from '../middleware/errorHandler';
+import { logger } from '../utils/logger';
+import { uploadImageFromBuffer } from '../utils/cloudinary';
 
 // Get all recipes with optional filters
 export const getRecipes = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {

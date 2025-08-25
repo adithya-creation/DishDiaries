@@ -11,19 +11,19 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-import { database } from '@/config/database';
-import { logger, morganStream } from '@/utils/logger';
-import { errorHandler, notFound, unhandledRejectionHandler, uncaughtExceptionHandler } from '@/middleware/errorHandler';
-import { apiLimiter } from '@/middleware/rateLimiter';
+import { database } from './config/database';
+import { logger, morganStream } from './utils/logger';
+import { errorHandler, notFound, unhandledRejectionHandler, uncaughtExceptionHandler } from './middleware/errorHandler';
+import { apiLimiter } from './middleware/rateLimiter';
 
 // Import routes
-import authRoutes from '@/routes/authRoutes';
-import userRoutes from '@/routes/userRoutes';
-import recipeRoutes from '@/routes/recipeRoutes';
-import uploadRoutes from '@/routes/uploadRoutes';
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
+import recipeRoutes from './routes/recipeRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 // Import socket configuration
-import { initializeSocket } from '@/socket/socketHandler';
+import { initializeSocket } from './socket/socketHandler';
 
 // Handle uncaught exceptions and unhandled rejections
 uncaughtExceptionHandler();

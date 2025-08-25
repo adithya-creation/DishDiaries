@@ -1,5 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
-import { ICollection } from '@/types';
+import { ICollection } from '../types';
 
 const CollectionSchema = new Schema<ICollection>({
   name: {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import { ApiResponse, ValidationError } from '@/types';
+import { ApiResponse, ValidationError } from '../types';
 import { ValidationErrorClass } from './errorHandler';
 
 // Validation schemas

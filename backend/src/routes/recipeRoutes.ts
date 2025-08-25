@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { authenticate, optionalAuth } from '@/middleware/auth';
-import { validateCreateRecipe } from '@/middleware/validation';
-import { uploadImageSingle } from '@/middleware/upload';
+import { authenticate, optionalAuth } from '../middleware/auth';
+import { validateCreateRecipe } from '../middleware/validation';
+import { uploadImageSingle } from '../middleware/upload';
 import {
   getRecipes,
   getRecipe,
@@ -10,7 +10,7 @@ import {
   deleteRecipe,
   toggleLike,
   getUserRecipes
-} from '@/controllers/recipeController';
+} from '../controllers/recipeController';
 
 const router = Router();
 

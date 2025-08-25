@@ -1,5 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
-import { IRecipe, IIngredient, IInstruction, IComment, INutrition } from '@/types';
+import { IRecipe, IIngredient, IInstruction, IComment, INutrition } from '../types';
 
 const IngredientSchema = new Schema<IIngredient>({
   name: {

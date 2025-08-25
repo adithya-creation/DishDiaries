@@ -3,6 +3,7 @@ import { Recipe } from '@/models/Recipe';
 import { AuthRequest, ApiResponse } from '@/types';
 import { asyncHandler, AppError } from '@/middleware/errorHandler';
 import { logger } from '@/utils/logger';
+import { uploadImageFromBuffer } from '@/utils/cloudinary';
 
 // Get all recipes with optional filters
 export const getRecipes = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -108,28 +109,64 @@ export const createRecipe = async (req: AuthRequest, res: Response, next: NextFu
     description,
     ingredients,
     instructions,
-    prepTime,
-    cookTime,
-    servings,
+    prepTime: prepTimeStr,
+    cookTime: cookTimeStr,
+    servings: servingsStr,
     difficulty,
+    dietaryPreference,
     tags,
-    imageUrl,
+    imageUrl: bodyImageUrl,
     nutrition,
     isPublic = true
   } = req.body;
 
+  // Parse numeric values from FormData (they come as strings)
+  const prepTime = parseInt(prepTimeStr as string);
+  const cookTime = parseInt(cookTimeStr as string);
+  const servings = parseInt(servingsStr as string);
+
+  // Parse arrays from FormData (they come as JSON strings)
+  const parsedIngredients = typeof ingredients === 'string' ? JSON.parse(ingredients) : ingredients;
+  const parsedInstructions = typeof instructions === 'string' ? JSON.parse(instructions) : instructions;
+  const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+  const parsedNutrition = typeof nutrition === 'string' ? JSON.parse(nutrition) : nutrition;
+
+  // Accept either uploaded file or image URL, but not both
+  const file = (req as any).file as { buffer: Buffer; originalname: string } | undefined;
+  const hasFile = Boolean(file && file.buffer);
+  const hasUrl = typeof bodyImageUrl === 'string' && bodyImageUrl.trim().length > 0;
+
+  if (hasFile && hasUrl) {
+    return next(new AppError('Provide either an image file or image URL, not both', 400, 'IMAGE_INPUT_CONFLICT'));
+  }
+
+  if (!hasFile && !hasUrl) {
+    return next(new AppError('Image is required. Upload a file or provide an image URL', 400, 'IMAGE_REQUIRED'));
+  }
+
+  // Upload file to Cloudinary if provided; otherwise use the URL as-is
+  let finalImageUrl = hasUrl ? bodyImageUrl.trim() : '';
+  let imagePublicId: string | undefined = undefined;
+  if (hasFile && file) {
+    const uploaded = await uploadImageFromBuffer(file.buffer, `${Date.now()}_${file.originalname}`);
+    finalImageUrl = uploaded.url;
+    imagePublicId = uploaded.publicId;
+  }
+
   const recipe = new Recipe({
     title,
     description,
-    ingredients,
-    instructions,
+    ingredients: parsedIngredients,
+    instructions: parsedInstructions,
     prepTime,
     cookTime,
     servings,
     difficulty,
-    tags,
-    imageUrl,
-    nutrition,
+    dietaryPreference,
+    tags: parsedTags,
+    imageUrl: finalImageUrl,
+    imagePublicId,
+    nutrition: parsedNutrition,
     isPublic,
     author: req.userId
   });

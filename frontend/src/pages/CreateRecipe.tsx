@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,6 +48,8 @@ export default function CreateRecipe() {
   const [servings, setServings] = useState('4');
   const [difficulty, setDifficulty] = useState('Medium');
   const [dietaryPreference, setDietaryPreference] = useState('Vegetarian');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageMode, setImageMode] = useState<'upload' | 'link'>('upload');
   const [imageUrl, setImageUrl] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -160,8 +163,13 @@ export default function CreateRecipe() {
       return;
     }
     
-    if (!imageUrl.trim()) {
-      toast.error('Please enter an image URL');
+    if (imageMode === 'upload' && !imageFile) {
+      toast.error('Please upload an image file');
+      setLoading(false);
+      return;
+    }
+    if (imageMode === 'link' && !imageUrl.trim()) {
+      toast.error('Please provide an image URL');
       setLoading(false);
       return;
     }
@@ -191,12 +199,15 @@ export default function CreateRecipe() {
       servings: Number(servings),
       difficulty,
       dietaryPreference,
+      imageMode,
+      imageFile: imageFile?.name,
       imageUrl: imageUrl.trim(),
       ingredientsCount: ingredients.length,
       instructionsCount: instructions.length
     });
 
-    const recipeData = {
+    // Build payload
+    const basePayload = {
       title: title.trim(),
       description: description.trim(),
       prepTime: Number(prepTime),
@@ -204,7 +215,6 @@ export default function CreateRecipe() {
       servings: Number(servings),
       difficulty,
       dietaryPreference,
-      imageUrl: imageUrl.trim(),
       tags,
       ingredients: ingredients
         .filter(ing => ing.name.trim() && ing.amount.trim() && ing.unit.trim())
@@ -222,8 +232,28 @@ export default function CreateRecipe() {
         }))
     };
 
+    let requestBody: any = basePayload;
+    let useFormData = false;
+    if (imageMode === 'upload') {
+      const payload = new FormData();
+      Object.entries(basePayload).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          payload.append(key, JSON.stringify(value));
+        } else if (typeof value === 'object' && value !== null) {
+          payload.append(key, JSON.stringify(value));
+        } else {
+          payload.append(key, String(value ?? ''));
+        }
+      });
+      if (imageFile) payload.append('image', imageFile);
+      requestBody = payload;
+      useFormData = true;
+    } else {
+      requestBody = { ...basePayload, imageUrl: imageUrl.trim() };
+    }
+
     try {
-      const response = await recipeAPI.createRecipe(recipeData);
+      const response = await recipeAPI.createRecipe(requestBody);
       
       if (response.success) {
         toast.success('Recipe created successfully!');
@@ -239,7 +269,7 @@ export default function CreateRecipe() {
           try {
             const recipesResponse = await recipeAPI.getRecipes();
             const latestRecipe = recipesResponse.data.recipes[0];
-            if (latestRecipe && latestRecipe.title === recipeData.title) {
+            if (latestRecipe && latestRecipe.title === basePayload.title) {
               toast.success('Recipe created successfully!');
               navigate(`/recipe/${latestRecipe._id}`);
               return;
@@ -338,15 +368,28 @@ export default function CreateRecipe() {
                 />
               </div>
               
-              <div>
-                <Label htmlFor="imageUrl">Image URL *</Label>
-                <Input
-                  id="imageUrl"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  required
-                />
+              <div className="grid gap-3">
+                <Label>Recipe Image *</Label>
+                <Tabs value={imageMode} onValueChange={(v) => setImageMode(v as 'upload' | 'link')}>
+                  <TabsList>
+                    <TabsTrigger value="upload">Upload</TabsTrigger>
+                    <TabsTrigger value="link">Link</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    />
+                  </TabsContent>
+                  <TabsContent value="link">
+                    <Input
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </TabsContent>
+                </Tabs>
               </div>
               
               {/* Recipe Stats */}

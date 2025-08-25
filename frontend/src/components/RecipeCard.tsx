@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { ChefHat } from 'lucide-react';
+import { ChefHat, Leaf, Beef, Sprout } from 'lucide-react';
 
 interface Recipe {
   id: string;
@@ -45,6 +45,35 @@ export const RecipeCard = ({ recipe }: RecipeCardProps) => {
     }
   };
 
+  const getDietaryPreferenceStyle = (preference: string) => {
+    switch (preference) {
+      case 'Vegetarian':
+        return {
+          bg: 'bg-green-500',
+          icon: Leaf,
+          iconColor: 'text-white'
+        };
+      case 'Non-Vegetarian':
+        return {
+          bg: 'bg-red-500',
+          icon: Beef,
+          iconColor: 'text-white'
+        };
+      case 'Vegan':
+        return {
+          bg: 'bg-emerald-500',
+          icon: Sprout,
+          iconColor: 'text-white'
+        };
+      default:
+        return {
+          bg: 'bg-gray-500',
+          icon: Leaf,
+          iconColor: 'text-white'
+        };
+    }
+  };
+
   return (
     <div className="card-modern hover-lift group overflow-hidden">
       {/* Image */}
@@ -69,8 +98,17 @@ export const RecipeCard = ({ recipe }: RecipeCardProps) => {
             {recipe.difficulty}
           </Badge>
           {recipe.dietaryPreference && (
-            <Badge className="text-xs font-medium shadow-lg bg-green-500 text-white">
-              {recipe.dietaryPreference}
+            <Badge className={`text-xs font-medium shadow-lg text-white ${getDietaryPreferenceStyle(recipe.dietaryPreference).bg}`}>
+              {(() => {
+                const style = getDietaryPreferenceStyle(recipe.dietaryPreference);
+                const IconComponent = style.icon;
+                return (
+                  <div className="flex items-center">
+                    <IconComponent className={`w-3 h-3 mr-1 ${style.iconColor}`} />
+                    {recipe.dietaryPreference}
+                  </div>
+                );
+              })()}
             </Badge>
           )}
         </div>

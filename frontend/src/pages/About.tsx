@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { ChefHat } from 'lucide-react';
+import { ChefHat, Search, Users, FolderOpen, Heart, Zap, Shield, Network } from 'lucide-react';
 
 const About = () => {
   return (
@@ -58,21 +58,7 @@ const About = () => {
             </div>
             <div className="bg-orange-100 rounded-lg p-8 text-center">
               <div className="w-24 h-24 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                {/* Community Connection Icon */}
-                <div className="relative w-12 h-12">
-                  {/* Central Circle */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-orange-600 rounded-full"></div>
-                  {/* Connecting Lines */}
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-0.5 h-3 bg-orange-600"></div>
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0.5 h-3 bg-orange-600"></div>
-                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-0.5 bg-orange-600"></div>
-                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-0.5 bg-orange-600"></div>
-                  {/* Corner Circles */}
-                  <div className="absolute top-0 left-0 w-2 h-2 bg-orange-600 rounded-full"></div>
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-orange-600 rounded-full"></div>
-                  <div className="absolute bottom-0 left-0 w-2 h-2 bg-orange-600 rounded-full"></div>
-                  <div className="absolute bottom-0 right-0 w-2 h-2 bg-orange-600 rounded-full"></div>
-                </div>
+                <Network className="w-12 h-12 text-orange-600" />
               </div>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Community First</h4>
               <p className="text-gray-600 text-sm">
@@ -97,11 +83,7 @@ const About = () => {
             <Card className="border-0 shadow-sm">
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  {/* Smart Search Icon - Magnifying Glass */}
-                  <div className="relative w-6 h-6">
-                    <div className="w-4 h-4 border-2 border-orange-600 rounded-full"></div>
-                    <div className="absolute bottom-0 right-0 w-2 h-1 bg-orange-600 transform rotate-45 origin-top-left"></div>
-                  </div>
+                  <Search className="w-6 h-6 text-orange-600" />
                 </div>
                 <CardTitle className="text-xl text-gray-900">Smart Search</CardTitle>
                 <CardDescription>
@@ -113,12 +95,7 @@ const About = () => {
             <Card className="border-0 shadow-sm">
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  {/* Community Icon - People */}
-                  <div className="relative w-6 h-6">
-                    <div className="w-2 h-2 bg-orange-600 rounded-full absolute top-0 left-0"></div>
-                    <div className="w-2 h-2 bg-orange-600 rounded-full absolute top-0 right-0"></div>
-                    <div className="w-2 h-2 bg-orange-600 rounded-full absolute bottom-0 left-1/2 transform -translate-x-1/2"></div>
-                  </div>
+                  <Users className="w-6 h-6 text-orange-600" />
                 </div>
                 <CardTitle className="text-xl text-gray-900">Community Driven</CardTitle>
                 <CardDescription>
@@ -130,12 +107,7 @@ const About = () => {
             <Card className="border-0 shadow-sm">
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  {/* Organization Icon - Folder */}
-                  <div className="relative w-6 h-6">
-                    <div className="w-5 h-4 bg-orange-600 rounded-t-lg"></div>
-                    <div className="w-6 h-3 bg-orange-600 rounded-b-lg"></div>
-                    <div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full"></div>
-                  </div>
+                  <FolderOpen className="w-6 h-6 text-orange-600" />
                 </div>
                 <CardTitle className="text-xl text-gray-900">Easy Organization</CardTitle>
                 <CardDescription>
@@ -147,15 +119,11 @@ const About = () => {
             <Card className="border-0 shadow-sm">
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  {/* Share & Save Icon - Heart */}
-                  <div className="relative w-6 h-6">
-                    <div className="w-6 h-6 bg-orange-600 transform rotate-45"></div>
-                    <div className="absolute top-1 left-1 w-4 h-4 bg-white transform rotate-45"></div>
-                  </div>
+                  <Heart className="w-6 h-6 text-orange-600" />
                 </div>
-                <CardTitle className="text-xl text-gray-900">Share & Save</CardTitle>
+                <CardTitle className="text-xl text-gray-900">Share</CardTitle>
                 <CardDescription>
-                  Save your favorite recipes and share them with friends and family
+                  Share your favorite recipes with friends and family
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -163,11 +131,7 @@ const About = () => {
             <Card className="border-0 shadow-sm">
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  {/* Fast & Modern Icon - Lightning */}
-                  <div className="relative w-6 h-6">
-                    <div className="w-0 h-0 border-l-3 border-r-3 border-b-6 border-l-transparent border-r-transparent border-b-orange-600 absolute top-0 left-1/2 transform -translate-x-1/2"></div>
-                    <div className="w-1 h-3 bg-orange-600 absolute bottom-0 left-1/2 transform -translate-x-1/2"></div>
-                  </div>
+                  <Zap className="w-6 h-6 text-orange-600" />
                 </div>
                 <CardTitle className="text-xl text-gray-900">Fast & Modern</CardTitle>
                 <CardDescription>
@@ -179,11 +143,7 @@ const About = () => {
             <Card className="border-0 shadow-sm">
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  {/* Safe & Secure Icon - Shield */}
-                  <div className="relative w-6 h-6">
-                    <div className="w-4 h-5 bg-orange-600 rounded-t-lg absolute top-0 left-1/2 transform -translate-x-1/2"></div>
-                    <div className="w-6 h-1 bg-orange-600 absolute bottom-0 left-1/2 transform -translate-x-1/2"></div>
-                  </div>
+                  <Shield className="w-6 h-6 text-orange-600" />
                 </div>
                 <CardTitle className="text-xl text-gray-900">Safe & Secure</CardTitle>
                 <CardDescription>
@@ -211,7 +171,7 @@ const About = () => {
               </Button>
             </Link>
             <Link to="/recipes">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-orange-600 px-8 py-3">
+              <Button size="lg" variant="outline" className="border-white text-white bg-orange-600 hover:bg-white hover:text-orange-600 px-8 py-3">
                 Browse Recipes
               </Button>
             </Link>

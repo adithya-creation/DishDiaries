@@ -138,6 +138,14 @@ const RecipeSchema = new Schema<IRecipe>({
       message: 'Difficulty must be Easy, Medium, or Hard'
     }
   },
+  dietaryPreference: {
+    type: String,
+    required: [true, 'Dietary preference is required'],
+    enum: {
+      values: ['Vegetarian', 'Non-Vegetarian', 'Vegan'],
+      message: 'Dietary preference must be Vegetarian, Non-Vegetarian, or Vegan'
+    }
+  },
   tags: [{
     type: String,
     trim: true,

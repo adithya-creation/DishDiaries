@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate, optionalAuth } from '@/middleware/auth';
 import { validateCreateRecipe } from '@/middleware/validation';
+import { uploadImageSingle } from '@/middleware/upload';
 import {
   getRecipes,
   getRecipe,
@@ -24,7 +25,7 @@ router.use(authenticate);
 router.get('/user/me', getUserRecipes);
 
 // Recipe CRUD operations
-router.post('/', createRecipe);
+router.post('/', uploadImageSingle, createRecipe);
 router.put('/:id', updateRecipe);
 router.delete('/:id', deleteRecipe);
 

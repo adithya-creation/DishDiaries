@@ -64,6 +64,7 @@ export interface IRecipe extends Document {
   cookTime: number;
   servings: number;
   difficulty: 'Easy' | 'Medium' | 'Hard';
+  dietaryPreference: 'Vegetarian' | 'Non-Vegetarian' | 'Vegan';
   tags: string[];
   imageUrl: string;
   imagePublicId?: string;

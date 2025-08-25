@@ -4,10 +4,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
 
 // Create axios instance
 export const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL
 });
 
 // Add auth token to requests
@@ -111,7 +108,11 @@ export const recipeAPI = {
   },
   
   createRecipe: async (recipe: any) => {
-    const response = await api.post('/recipes', recipe);
+    // If FormData is passed, let the browser set the multipart boundary
+    const isFormData = typeof FormData !== 'undefined' && recipe instanceof FormData;
+    const response = await api.post('/recipes', recipe, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : { 'Content-Type': 'application/json' }
+    });
     return response.data;
   },
   

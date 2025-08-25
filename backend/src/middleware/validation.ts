@@ -166,6 +166,13 @@ export const schemas = {
         'any.only': 'Difficulty must be Easy, Medium, or Hard',
         'any.required': 'Difficulty level is required'
       }),
+    dietaryPreference: Joi.string()
+      .valid('Vegetarian', 'Non-Vegetarian', 'Vegan')
+      .required()
+      .messages({
+        'any.only': 'Dietary preference must be Vegetarian, Non-Vegetarian, or Vegan',
+        'any.required': 'Dietary preference is required'
+      }),
     tags: Joi.array()
       .items(Joi.string().trim().lowercase())
       .default([]),
@@ -178,13 +185,7 @@ export const schemas = {
       sugar: Joi.number().min(0),
       sodium: Joi.number().min(0)
     }).optional(),
-    imageUrl: Joi.string()
-      .min(1)
-      .required()
-      .messages({
-        'string.min': 'Recipe image URL is required',
-        'any.required': 'Recipe image URL is required'
-      }),
+    imageUrl: Joi.string().allow(''),
     isPublic: Joi.boolean().default(true)
   }),
 

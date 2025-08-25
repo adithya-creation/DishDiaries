@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, X, ArrowLeft } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Loader2, Plus, X, ArrowLeft, Save } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,10 +27,30 @@ interface Instruction {
   description: string;
 }
 
-export default function CreateRecipe() {
+interface Recipe {
+  _id: string;
+  title: string;
+  description: string;
+  ingredients: Ingredient[];
+  instructions: Instruction[];
+  prepTime: number;
+  cookTime: number;
+  servings: number;
+  difficulty: string;
+  tags: string[];
+  imageUrl: string;
+  nutrition?: any;
+  isPublic: boolean;
+  author: string;
+}
+
+export default function EditRecipe() {
+  const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
 
   // Predefined units for ingredients
   const predefinedUnits = [
@@ -46,7 +67,6 @@ export default function CreateRecipe() {
   const [cookTime, setCookTime] = useState('45');
   const [servings, setServings] = useState('4');
   const [difficulty, setDifficulty] = useState('Medium');
-  const [dietaryPreference, setDietaryPreference] = useState('Vegetarian');
   const [imageUrl, setImageUrl] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -56,6 +76,7 @@ export default function CreateRecipe() {
   const [instructions, setInstructions] = useState<Instruction[]>([
     { step: 1, description: '' }
   ]);
+  const [isPublic, setIsPublic] = useState(true);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -63,7 +84,48 @@ export default function CreateRecipe() {
     return null;
   }
 
+  useEffect(() => {
+    if (id) {
+      fetchRecipe();
+    }
+  }, [id]);
 
+  const fetchRecipe = async () => {
+    try {
+      setLoading(true);
+      const response = await recipeAPI.getRecipe(id!);
+      
+      if (response.success) {
+        const recipeData = response.data.recipe;
+        
+        // Check if user is the author
+        if (recipeData.author._id !== user?._id) {
+          toast.error('You are not authorized to edit this recipe');
+          navigate('/my-recipes');
+          return;
+        }
+
+        setRecipe(recipeData);
+        setTitle(recipeData.title);
+        setDescription(recipeData.description);
+        setPrepTime(recipeData.prepTime.toString());
+        setCookTime(recipeData.cookTime.toString());
+        setServings(recipeData.servings.toString());
+        setDifficulty(recipeData.difficulty);
+        setImageUrl(recipeData.imageUrl);
+        setTags(recipeData.tags || []);
+        setIngredients(recipeData.ingredients || [{ name: '', amount: '', unit: '', remarks: '' }]);
+        setInstructions(recipeData.instructions || [{ step: 1, description: '' }]);
+        setIsPublic(recipeData.isPublic);
+      }
+    } catch (error: any) {
+      console.error('Error fetching recipe:', error);
+      toast.error('Failed to load recipe');
+      navigate('/my-recipes');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addIngredient = () => {
     setIngredients([...ingredients, { name: '', amount: '', unit: '', remarks: '' }]);
@@ -115,54 +177,48 @@ export default function CreateRecipe() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
 
-    // Enhanced validation with better error messages
+    // Validation
     if (!title.trim()) {
       toast.error('Please enter a recipe title');
-      setLoading(false);
+      setSaving(false);
       return;
     }
     
     if (!description.trim()) {
       toast.error('Please enter a recipe description');
-      setLoading(false);
+      setSaving(false);
       return;
     }
     
     if (!prepTime || prepTime <= 0) {
       toast.error('Please enter a valid prep time (greater than 0)');
-      setLoading(false);
+      setSaving(false);
       return;
     }
     
     if (!cookTime || cookTime <= 0) {
       toast.error('Please enter a valid cook time (greater than 0)');
-      setLoading(false);
+      setSaving(false);
       return;
     }
     
     if (!servings || servings <= 0) {
       toast.error('Please enter a valid number of servings (greater than 0)');
-      setLoading(false);
+      setSaving(false);
       return;
     }
     
     if (!difficulty) {
       toast.error('Please select a difficulty level');
-      setLoading(false);
-      return;
-    }
-    
-    if (!dietaryPreference) {
-      toast.error('Please select a dietary preference');
-      setLoading(false);
+      setSaving(false);
       return;
     }
     
     if (!imageUrl.trim()) {
       toast.error('Please enter an image URL');
-      setLoading(false);
+      setSaving(false);
       return;
     }
 
@@ -170,7 +226,7 @@ export default function CreateRecipe() {
     const invalidIngredients = ingredients.filter(ing => !ing.name.trim() || !ing.amount.trim() || !ing.unit.trim());
     if (invalidIngredients.length > 0) {
       toast.error('Please complete all ingredient fields (name, amount, and unit are required)');
-      setLoading(false);
+      setSaving(false);
       return;
     }
 
@@ -178,23 +234,9 @@ export default function CreateRecipe() {
     const invalidInstructions = instructions.filter(inst => !inst.description.trim());
     if (invalidInstructions.length > 0) {
       toast.error('Please complete all instruction descriptions');
-      setLoading(false);
+      setSaving(false);
       return;
     }
-
-    // Debug: Log the values being submitted
-    console.log('Form values being submitted:', {
-      title: title.trim(),
-      description: description.trim(),
-      prepTime: Number(prepTime),
-      cookTime: Number(cookTime),
-      servings: Number(servings),
-      difficulty,
-      dietaryPreference,
-      imageUrl: imageUrl.trim(),
-      ingredientsCount: ingredients.length,
-      instructionsCount: instructions.length
-    });
 
     const recipeData = {
       title: title.trim(),
@@ -203,7 +245,6 @@ export default function CreateRecipe() {
       cookTime: Number(cookTime),
       servings: Number(servings),
       difficulty,
-      dietaryPreference,
       imageUrl: imageUrl.trim(),
       tags,
       ingredients: ingredients
@@ -219,63 +260,59 @@ export default function CreateRecipe() {
         .map((inst, index) => ({
           step: index + 1,
           description: inst.description.trim()
-        }))
+        })),
+      isPublic
     };
 
     try {
-      const response = await recipeAPI.createRecipe(recipeData);
+      const response = await recipeAPI.updateRecipe(id!, recipeData);
       
       if (response.success) {
-        toast.success('Recipe created successfully!');
-        navigate(`/recipe/${response.data.recipe._id}`);
+        toast.success('Recipe updated successfully!');
+        navigate(`/recipe/${id}`);
       }
     } catch (error: any) {
-      console.error('Recipe creation error:', error.response?.status, error.response?.data);
+      console.error('Recipe update error:', error);
       
-      // Check if the error is a server error but recipe might have been created
-      if (error.response?.status === 500) {
-        // Wait a moment and try to refetch recipes to see if it was created
-        setTimeout(async () => {
-          try {
-            const recipesResponse = await recipeAPI.getRecipes();
-            const latestRecipe = recipesResponse.data.recipes[0];
-            if (latestRecipe && latestRecipe.title === recipeData.title) {
-              toast.success('Recipe created successfully!');
-              navigate(`/recipe/${latestRecipe._id}`);
-              return;
-            }
-          } catch (refetchError) {
-            console.error('Refetch error:', refetchError);
-          }
-          
-          // If we get here, show the error
-          toast.error('There was a server error, but your recipe may have been created. Please check your recipes.');
-        }, 1000);
-        return;
-      }
-      
-      let message = 'Failed to create recipe';
+      let message = 'Failed to update recipe';
       
       if (error.response?.data?.message) {
         message = error.response.data.message;
       } else if (error.response?.data?.error) {
         message = error.response.data.error;
-      } else if (error.response?.data?.errors) {
-        // Handle validation errors array
-        const errors = error.response.data.errors;
-        if (Array.isArray(errors) && errors.length > 0) {
-          message = errors.map(err => err.message || err.field).join(', ');
-        }
       } else if (error.message) {
         message = error.message;
       }
       
       toast.error(message);
-      setLoading(false); // Ensure loading is reset on error
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading recipe...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Recipe not found</p>
+          <Button onClick={() => navigate('/my-recipes')} className="mt-4">
+            Back to My Recipes
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -283,27 +320,20 @@ export default function CreateRecipe() {
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <div className="flex gap-2 mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/my-recipes')}
-            >
-              My Recipes
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/my-recipes')}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to My Recipes
+          </Button>
           
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create New Recipe
+            Edit Recipe
           </h1>
           <p className="text-gray-600">
-            Share your culinary creation with the community
+            Update your culinary creation
           </p>
         </div>
 
@@ -312,7 +342,7 @@ export default function CreateRecipe() {
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Tell us about your recipe</CardDescription>
+              <CardDescription>Update your recipe details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -347,6 +377,15 @@ export default function CreateRecipe() {
                   placeholder="https://example.com/image.jpg"
                   required
                 />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isPublic"
+                  checked={isPublic}
+                  onCheckedChange={setIsPublic}
+                />
+                <Label htmlFor="isPublic">Make recipe public</Label>
               </div>
               
               {/* Recipe Stats */}
@@ -426,34 +465,18 @@ export default function CreateRecipe() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="difficulty">Difficulty *</Label>
-                  <Select value={difficulty} onValueChange={setDifficulty} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="dietaryPreference">Dietary Preference *</Label>
-                  <Select value={dietaryPreference} onValueChange={setDietaryPreference} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Vegetarian">Vegetarian</SelectItem>
-                      <SelectItem value="Non-Vegetarian">Non-Vegetarian</SelectItem>
-                      <SelectItem value="Vegan">Vegan</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="difficulty">Difficulty *</Label>
+                <Select value={difficulty} onValueChange={setDifficulty} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Easy">Easy</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -612,17 +635,20 @@ export default function CreateRecipe() {
 
           {/* Submit */}
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+            <Button type="button" variant="outline" onClick={() => navigate('/my-recipes')}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
+            <Button type="submit" disabled={saving}>
+              {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Saving...
                 </>
               ) : (
-                'Create Recipe'
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
               )}
             </Button>
           </div>
@@ -632,4 +658,4 @@ export default function CreateRecipe() {
       <Footer />
     </div>
   );
-} 
+}

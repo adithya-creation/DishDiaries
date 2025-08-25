@@ -73,6 +73,10 @@ export const getRecipes = asyncHandler(async (req: Request, res: Response, next:
 
 // Get single recipe by ID
 export const getRecipe = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  console.log('getRecipe called with id:', req.params.id);
+  console.log('Request headers:', req.headers);
+  console.log('User ID from optional auth:', req.userId);
+  
   const { id } = req.params;
 
   const recipe = await Recipe.findById(id)
@@ -80,8 +84,11 @@ export const getRecipe = asyncHandler(async (req: Request, res: Response, next: 
     .populate('comments.user', 'username avatar');
 
   if (!recipe) {
+    console.log('Recipe not found for id:', id);
     return next(new AppError('Recipe not found', 404, 'RECIPE_NOT_FOUND'));
   }
+
+  console.log('Recipe found:', recipe.title);
 
   // Increment views
   await recipe.incrementViews();
@@ -232,6 +239,82 @@ export const toggleLike = asyncHandler(async (req: AuthRequest, res: Response, n
     data: {
       liked: !hasLiked,
       likesCount: recipe.likes.length
+    }
+  } as ApiResponse);
+});
+
+// Get recipes created by the authenticated user
+export const getUserRecipes = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  console.log('getUserRecipes called with userId:', req.userId);
+  console.log('Request headers:', req.headers);
+  
+  const {
+    page = 1,
+    limit = 20,
+    search,
+    difficulty,
+    tags,
+    sort = 'createdAt',
+    sortOrder = 'desc'
+  } = req.query;
+
+  const pageNum = parseInt(page as string);
+  const limitNum = parseInt(limit as string);
+  const skip = (pageNum - 1) * limitNum;
+
+  // Build query - only recipes by the authenticated user
+  const query: any = { author: req.userId };
+  console.log('Query:', query);
+
+  // Search functionality
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+      { tags: { $in: [new RegExp(search as string, 'i')] } }
+    ];
+  }
+
+  // Filter by difficulty
+  if (difficulty) {
+    query.difficulty = difficulty;
+  }
+
+  // Filter by tags
+  if (tags) {
+    const tagArray = Array.isArray(tags) ? tags : [tags];
+    query.tags = { $in: tagArray };
+  }
+
+  // Sort options
+  const sortOptions: any = {};
+  sortOptions[sort as string] = sortOrder === 'asc' ? 1 : -1;
+
+  console.log('Final query:', query);
+  console.log('Sort options:', sortOptions);
+
+  const recipes = await Recipe.find(query)
+    .populate('author', 'username avatar')
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(limitNum)
+    .lean();
+
+  console.log('Found recipes:', recipes.length);
+
+  const total = await Recipe.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    message: 'User recipes retrieved successfully',
+    data: {
+      recipes,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum)
+      }
     }
   } as ApiResponse);
 }); 

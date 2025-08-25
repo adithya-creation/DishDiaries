@@ -7,17 +7,21 @@ import {
   createRecipe,
   updateRecipe,
   deleteRecipe,
-  toggleLike
+  toggleLike,
+  getUserRecipes
 } from '@/controllers/recipeController';
 
 const router = Router();
 
-// Public routes
+// Public routes - these must come first
 router.get('/', optionalAuth, getRecipes);
 router.get('/:id', optionalAuth, getRecipe);
 
 // Protected routes - require authentication
 router.use(authenticate);
+
+// User's own recipes
+router.get('/user/me', getUserRecipes);
 
 // Recipe CRUD operations
 router.post('/', createRecipe);

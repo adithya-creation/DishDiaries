@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { UploadedFile } from '@/types';
 import { logger } from './logger';
+import type { Request } from 'express';
+import type { FileFilterCallback } from 'multer';
 
 // Configure Cloudinary
 cloudinary.config({

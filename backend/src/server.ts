@@ -93,7 +93,7 @@ class Server {
     this.app.use('/api', apiLimiter);
 
     // Health check endpoint
-    this.app.get('/health', async (req, res) => {
+    this.app.get('/health', async (req: any, res: any) => {
       const healthCheck = await database.healthCheck();
       
       res.status(healthCheck.status === 'healthy' ? 200 : 503).json({
@@ -107,7 +107,7 @@ class Server {
     });
 
     // API info endpoint
-    this.app.get('/api', (req, res) => {
+    this.app.get('/api', (req: any, res: any) => {
       res.json({
         name: 'DishDiaries API',
         version: '1.0.0',

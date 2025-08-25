@@ -120,6 +120,7 @@ export interface AuthRequest extends Request {
   params: any;
   query: any;
   headers: any;
+  body: any;
 }
 
 // API Response Types

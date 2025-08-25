@@ -117,6 +117,9 @@ export interface AuthRequest extends Request {
   user?: IUser;
   userId?: string;
   resourceId?: string;
+  params: any;
+  query: any;
+  headers: any;
 }
 
 // API Response Types
